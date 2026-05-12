@@ -184,6 +184,20 @@ class BinOpnode:
         return f'{self.left_node},{self.op_tokn},{self.right_node}'   
 
 
+############################3
+##########unary op node##########
+class UnaryOpnode:
+     def __init__(self,op_tokn,node):
+          self.op_tokn = op_tokn
+          self.node = node
+
+     def __repr__(self):
+          return f'{self.op_tokn},{self.node}'
+     
+           
+
+
+
 
 #################33
 ###parser result######
@@ -192,13 +206,15 @@ class ParseResult:
      def __init__(self):
           self.error = None
           self.node = None
-
+          
+   
+    
 
      def register(self, res):
-        if isinstance(res,ParseResult):
+         if isinstance(res, ParseResult):
              if res.error :self.error = res.error
              return res.node
-        return res 
+         return res 
         
 
      def success(self , node):
@@ -222,7 +238,7 @@ class Parser:
         self.tok_idx = -1
         self.advance()
 
-    def advance(self, ):
+    def advance(self):
             self.tok_idx+=1
             if self .tok_idx< len(self.tokens):
                 self.current_tok = self.tokens[self.tok_idx]
@@ -231,19 +247,39 @@ class Parser:
 ##################################################
     def parse (self):
             res = self.expr()
+
             if not res.error and self.current_tok.type_!=TT_EOF:
-                 return res.failure(InvalidSyntaxError( self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+','-','*' or '/'" ))
-            
+                 return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+','-','*' or '/'" ))
             return res
             
 
     def factor(self):
             res = ParseResult()
             tok = self.current_tok
-            if  tok.type_ in (TT_INT , TT_FLOAT):
-                res.register(self.advance())
-                return res.success(Numbernode(tok))
             
+            
+            if tok.type_ in (TT_PLUS, TT_MINUS):
+                 op_tokn = tok
+                 res.register(self.advance())
+                 factor = res.register(self.factor())
+                 if res.error : return res
+                 return res.success(UnaryOpnode(op_tokn,factor))
+             
+            elif tok.type_ in (TT_INT,TT_FLOAT):
+             res.register(self.advance())
+             return res.success(Numbernode(tok))
+         
+            elif tok.type_ == TT_LPAREN:
+             res.register(self.advance())      
+             expr = res.register(self.expr())
+            if res.error : return res  
+            if self.current_tok.type_ == TT_RPAREN:
+                    res.register(self.advance())
+                    return res.success(expr)    
+            else : 
+                return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected ')'")) 
+    
+         
             return res.failure(InvalidSyntaxError(tok.pos_start,tok.pos_end,"Expected int or float "))
 
     def term(self):
@@ -274,7 +310,6 @@ class Parser:
     
 ##### run #########
 #################
-
 
 
 def run (fn,text):

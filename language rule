@@ -1,9 +1,11 @@
- expr :  term(plus | minus)*
+ expr :  term(plus | minus)term *
 
 
- term : factor(mul | div )*
+ term : factor(mul | div )factor *
 
 
-factor :     int factor 
+factor :     int factor
+       :     (plus | minus)factor *
+       :     lPAREN expr RPAEN 
 
 
