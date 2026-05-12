@@ -136,7 +136,7 @@ class Lexer:
                 pos_start= self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(pos_start, self.pos, "'"+ char +"'")  
+                return [], IllegalCharError("'"+ char +"'",pos_start,self.pos)  
 
         tokens.append(Token(TT_EOF,pos_start=self.pos))
         return tokens , None 
@@ -287,7 +287,7 @@ def run (fn,text):
     parser= Parser(tokens)
     ast = parser.parse()
 
-    return ast.node,ast,error
+    return ast.node, ast.error
 
 
     
