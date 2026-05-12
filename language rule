@@ -1,0 +1,9 @@
+ expr :  term(plus | minus)*
+
+
+ term : factor(mul | div )*
+
+
+factor :     int factor 
+
+
