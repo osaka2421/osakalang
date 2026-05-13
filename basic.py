@@ -1,5 +1,8 @@
 
 ####postion######
+
+
+
 class position:
     def __init__(self,idx , ln , col,fn ,ftxt):
         self.idx = idx
@@ -48,8 +51,6 @@ class IllegalCharError(Error):
 class InvalidSyntaxError(Error):
      def __init__(self,pos_start,pos_end,details=''):
           super().__init__(pos_start,pos_end,'invalid syntax',details)
-
-
 
 
 ##########################
@@ -163,15 +164,20 @@ class Lexer:
 
 
 #################
-##############3###33
+###############
 #### nodes ######
 
 class Numbernode:
     def __init__(self,tok):
         self.token = tok
 
+        self.pos_start =self.token.pos_start
+        self.pos_end =self.token.pos_end
+
     def __repr__(self):
-        return f'{self.token}'    
+        return f'{self.token}'   
+
+    
     
 
 class BinOpnode:
@@ -179,6 +185,10 @@ class BinOpnode:
         self.left_node =left_node
         self.op_tokn =op_tokn
         self.right_node =right_node
+
+        self.pos_start = self.left_node.pos_start
+        self.pos_end = self.right_node.pos_end
+
 
     def __repr__(self):
         return f'{self.left_node},{self.op_tokn},{self.right_node}'   
@@ -190,6 +200,9 @@ class UnaryOpnode:
      def __init__(self,op_tokn,node):
           self.op_tokn = op_tokn
           self.node = node
+
+          self.pos_start = self.op_tokn.pos_start
+          self.pos_end = node.pos_end
 
      def __repr__(self):
           return f'{self.op_tokn},{self.node}'
@@ -302,27 +315,122 @@ class Parser:
 
                     
             return res.success(left)
-    
+
+     
+################
+#####values######
+
+class Number:
+     def __init__(self,value):
+        self.value = value
+        self.set_pos ()
+
+     def set_pos(self,pos_start=None,pos_end=None):
+          self.pos_start =pos_start
+          self.pos_end = pos_end
+          return self   
+     
+     def added_to(self,other):
+          if isinstance(other,Number):
+               return Number(self.value + other.value)
+
+     def subbed_by(self,other):
+          if isinstance(other,Number):
+               return Number(self.value - other.value) 
+
+     def multed_by(self,other):
+          if isinstance(other,Number):
+               return Number(self.value * other.value)   
+
+     def dived_by(self , other):
+          if isinstance(other,Number):
+               return Number(self.value / other.value)  
+
+     def __repr__(self):
+            return str(self.value)
+             
+
+          
+
+
+        
                 
+
+
+
+#####################
+######## interpreter ########
+
+class Interpreter :
+     def visit(self,node):
+          method_name = f'visit_{type(node).__name__}'
+          method = getattr(self,method_name,self.no_visit_method)
+          return method(node)
+     
+
+     def no_visit_method(self,node):
+          raise Exception(f'No visit_{type(node).__name__} method defined')
+     
+
+     def visit_Numbernode(self,node):
+          return Number(node.token.value).set_pos(node.pos_start,node.pos_end)
+
+     def visit_BinOpnode(self,node):
+        
+         left = self.visit(node.left_node)
+         right = self.visit(node.right_node)
+        
+
+         if node.op_tokn.value == TT_PLUS:
+              result = left.added_to(right)
+
+         elif node.op_tokn.value == TT_MINUS:
+              result = left.subbed_by(right)
+
+         elif node.op_tokn.value == TT_MUL:
+              result = left.multed_by(right)
+
+         elif node.op_tokn.value == TT_DIV:
+              result = left.dived_by(right) 
             
+         return result.set_pos(node.pos_start,node.pos_end)
+    
+
+     def visit_UnaryOpnode(self,node): 
+        number =self.visit(node.node) 
+
+        if node.op_tokn.type_ == TT_MINUS:
+             number = number.multed_by(Number(-1))
+
+        return number.set_pos(node.pos_start,node.pos_end)
+          
+                   
             
 
     
 ##### run #########
 #################
 
+##################
+### genarte tokens####
 
 def run (fn,text):
     lexer = Lexer(fn,text)
     tokens , error = lexer.make_tokens()
     if error : return None , error
 
-############################3333
-## ast###########
+############################
+## ast   ###########
     parser= Parser(tokens)
     ast = parser.parse()
+    if ast.error : return None , ast.error
 
-    return ast.node, ast.error
+###############################
+# run program
+    interpreter = Interpreter()
+    result = interpreter.visit(ast.node)
+
+    return result , None
 
 
     
