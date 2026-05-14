@@ -8,7 +8,7 @@
 
 factor :     (plus | minus)factor 
 
-power : atom(power factor )factor
+power : atom(power factor )factor 
 
 atom : int float
        lPAREN expr RPAREN
