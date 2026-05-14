@@ -4,8 +4,14 @@
  term : factor(mul | div )factor *
 
 
-factor :     int factor
-       :     (plus | minus)factor *
-       :     lPAREN expr RPAEN 
+
+
+factor :     (plus | minus)factor 
+
+power : atom(power factor )factor
+
+atom : int float
+       lPAREN expr RPAREN
+
 
 
