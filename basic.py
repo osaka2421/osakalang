@@ -77,7 +77,7 @@ class RTError(Error):
                 ctx = ctx.parent
 
 
-                return 'Traceback (most recent call last):\n' + result
+          return 'Traceback (most recent call last):\n' + result
              
 
 
@@ -90,9 +90,9 @@ class RTError(Error):
 
 TT_INT = 'INT'
 TT_FLOAT = 'FLOAT'
-TT_IDENTIFIER = 'IDENITIFIER'
+TT_IDENTIFIER = 'IDENTIFIER'
 TT_KEYWORD='KEYWORD'
-TT_EQ = ' EQ'
+TT_EQ = 'EQ'
 TT_PLUS ='PLUS'
 TT_MINUS = 'MINUS'
 TT_MUL = 'MUL'
@@ -100,7 +100,7 @@ TT_DIV = 'DIV'
 TT_POWER = "POWER"
 TT_RPAREN = 'RPAREN'
 TT_LPAREN ='LPAREN'
-TT_EOF='EOF'
+TT_EOF    =  'EOF'
 
 
 kEYWORD =[
@@ -120,6 +120,11 @@ class Token:
 
         if pos_end:
              self.pos_end = pos_end.copy()
+
+
+    def matches (self,type_ ,value):
+         return self.type_ == type_ and self.value== value
+               
 
    
 
@@ -150,7 +155,7 @@ class Lexer:
         tokens = []
 
         while self.current_char != None :
-            if self.current_char  in  '\t':
+            if self.current_char in ' \t':
                 self.advance()
             elif self.current_char in DIGITS :
                 tokens.append(self.make_number()) 
@@ -174,11 +179,11 @@ class Lexer:
             elif self .current_char == '=':
                 tokens.append(Token(TT_EQ,pos_start=self.pos))   
                 self.advance()
-            elif self.current_char == ')':
-                tokens.append(Token(TT_RPAREN,pos_start=self.pos)) 
-                self.advance()    
             elif self.current_char == '(':
-                tokens.append(Token(TT_LPAREN,pos_start=self.pos))  
+                tokens.append(Token(TT_LPAREN,pos_start=self.pos)) 
+                self.advance()    
+            elif self.current_char == ')':
+                tokens.append(Token(TT_RPAREN,pos_start=self.pos))  
                 self.advance()  
                 
                 
@@ -196,17 +201,18 @@ class Lexer:
         dot_count = 0
         pos_start = self.pos.copy()
 
-        while self .current_char != None and self.current_char in DIGITS+ '.':
-             if self .current_char == '.':
+        while self .current_char != None and self.current_char in DIGITS + '.':
+             if self.current_char == '.':
                  if dot_count == 1 : break 
                  dot_count += 1
                  num_str += '.'
+                 self.advance()
              else :
                  num_str += self.current_char
                  self.advance()
 
 
-        if dot_count==0:
+        if dot_count == 0:
             return Token(TT_INT, int(num_str),pos_start,self.pos)
         else:
             return Token(TT_FLOAT, float(num_str),pos_start,self.pos)
@@ -222,7 +228,7 @@ class Lexer:
 
 
             tok_type = TT_KEYWORD if id_str in kEYWORD else  TT_IDENTIFIER
-            return Token(tok_type,id_str,pos_start,self.pos)
+        return Token(tok_type,id_str,pos_start,self.pos)
 
             
 
@@ -243,9 +249,30 @@ class Numbernode:
 
     def __repr__(self):
         return f'{self.token}'   
+    
+    
+    
+class VarAssignNode:
+     def __init__(self,var_name_tok,value_node):
+       
+          self.var_name_tok= var_name_tok
+          self.value_node = value_node
 
-    
-    
+
+          self.pos_start = self.var_name_tok.pos_start
+          self.pos_end = self.var_name_tok.pos_end
+
+
+class VarAccessNode:
+     def __init__(self, var_name_tok):
+          self.var_name_tok =  var_name_tok
+        
+
+          self.pos_start = self.var_name_tok.pos_start
+          self.pos_end =self.value_node.pos_end
+
+
+
 
 class BinOpnode:
     def __init__(self,left_node,op_tokn,right_node):
@@ -329,7 +356,7 @@ class Parser:
             res = self.expr()
 
             if not res.error and self.current_tok.type_!=TT_EOF:
-                 return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+','-','*' or '/'" ))
+                 return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+','-','*','/'or'^'" ))
             return res
     
     def atom(self):
@@ -339,6 +366,10 @@ class Parser:
             if tok.type_ in (TT_INT, TT_FLOAT):
                 res.register(self.advance())
                 return res.success(Numbernode(tok))
+            
+            elif tok.type_ == TT_IDENTIFIER:
+                 res.register(self.advance())
+                 return res.success(VarAccessNode(tok))
             elif tok.type_ == TT_LPAREN:
                 res.register(self.advance())
                 expr = res.register(self.expr())
@@ -352,7 +383,7 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected int ,float,'+ ' , '-' , or '('") )
              
     def power(self):
-         return self.bin_op(self.atom,(TT_POWER,  ),self.factor)
+         return self.bin_op(self.atom,(TT_POWER, ),self.factor)
                                     
     
     def factor(self):
@@ -373,7 +404,46 @@ class Parser:
     def term(self):
             return self.bin_op(self.factor,(TT_MUL, TT_DIV))
     def expr(self):
-            return self.bin_op(self.term,(TT_PLUS, TT_MINUS))
+            res = ParseResult()
+            
+            if self.current_tok.matches(TT_KEYWORD, "VAR"):
+                 res.register(self.advance())
+
+
+
+                 if self.current_tok.type_ != TT_IDENTIFIER:     
+                     return res.failure(InvalidSyntaxError(
+                      self.current_tok.pos_start,self.current_tok.pos_end,
+                      "expected identifier"
+                     ))
+                 
+            
+
+
+                 var_name = self.current_tok
+                 res.register(self.advance())
+
+                 if self.current_tok.type_ != TT_EQ:
+                     return res.failure(InvalidSyntaxError(
+                       self.current_tok.pos_start,self.current_tok.pos_end,
+                       "Expected '=' "
+                      
+                      ))
+                 
+            
+            
+                 res.register(self.advance())
+                 expr = res.register(self.expr())
+                 if res.error : return res 
+                 return res.success(VarAssignNode(var_name, expr))
+            
+
+            return self.bin_op(self.term,(TT_PLUS,TT_MINUS))
+    
+           
+                 
+           
+        
         
     def bin_op(self,func_a, op,func_b = None):
             if func_b == None:
@@ -383,7 +453,7 @@ class Parser:
             if res.error : return res 
 
 
-            while  self.current_tok.type_ in (op):
+            while  self.current_tok.type_ in op:
                     op_tokn = self.current_tok
                     res.register(self.advance())
                     right =res.register(func_b())
@@ -423,7 +493,7 @@ class Number:
      def __init__(self,value):
         self.value = value
         self.set_pos ()
-        self
+
 
      def set_pos(self,pos_start=None,pos_end=None):
           self.pos_start =pos_start
@@ -459,9 +529,9 @@ class Number:
                 return Number(self.value / other.value).set_context(self.context), None 
           
      def powerd_by(self ,other):
-          if isinstance(other,Number):
+        if isinstance(other,Number):
                return Number(self.value ** other.value).set_context(self.context),None
-                    
+
 
      def __repr__(self):
             return str(self.value)
@@ -482,23 +552,31 @@ class Context :
 #####################
 ######## interpreter ########
 
+def visit_Numbernode(node, context):
+     return RTResult().success(
+        Number(node.token.value).set_context(context).set_pos(node.pos_start,node.pos_end)
+          )
+
+
 class Interpreter :
-     def visit(self,node , context):
+       def visit(self,node , context):
           method_name = f'visit_{type(node).__name__}'
           method = getattr(self,method_name,self.no_visit_method)
           return method(node ,context)
      
 
-     def no_visit_method(self,node , context):
+       def no_visit_method(self,node, context):
           raise Exception(f'No visit_{type(node).__name__} method defined')
-     
 
-     def visit_Numbernode(self,node,context):
-          return RTResult().success(
+###########################################################################3     
+      
+       def visit_Numbernode( self,node, context):
+        return RTResult().success(
              Number(node.token.value).set_context(context).set_pos(node.pos_start,node.pos_end)
-               )
+           )
+ 
 
-     def visit_BinOpnode(self,node,context):
+       def visit_BinOpnode(self,node,context):
          res = RTResult()
          left = res.register(self.visit(node.left_node,context))
          if res.error : return res
@@ -525,7 +603,7 @@ class Interpreter :
 
          return res.success(result.set_pos(node.pos_start,node.pos_end))
 
-     def visit_UnaryOpnode(self,node,context): 
+       def visit_UnaryOpnode(self,node,context): 
         res = RTResult()
         number = res.register(self.visit(node.node,context))
         if res.error : return res   
@@ -539,11 +617,9 @@ class Interpreter :
 
              else:
                 return res.success(number.set_pos(node.pos_start,node.pos_end))
-          
-                   
-            
+        
 
-    
+
 ##### run #########
 #################
 
