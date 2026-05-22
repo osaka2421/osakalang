@@ -113,7 +113,7 @@ TT_GTE = 'GTE'
 TT_EOF    =  'EOF'
 
 
-kEYWORDS = ["VAR","AND","OR","NOT"]
+kEYWORDS = ["HENSU","AND","OR","NOT"]
 
 
 class Token:
@@ -340,7 +340,7 @@ class BinOpNode:
         return f'{self.left_node},{self.op_tok},{self.right_node}'   
 
 
-############################3
+############################
 ##########unary op node##########
 class UnaryOpNode:
      def __init__(self,op_tok,node):
@@ -479,20 +479,25 @@ class Parser:
               if res.error: return res
               return res.success(UnaryOpNode(op_tok,node)) 
          
+         
+         
          node = res.register(self.bin_op(self.arith_expr,(TT_EE ,TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE)))
 
          if res.error:
               return res.failure(InvalidSyntaxError(
                    self.current_tok.pos_start ,self.current_tok.pos_end,
                     "Expected int ,float,identifier'+ ' , '-' , ' (' , 'NOT'"
-              ))
+               ))
+         
+
+         return res.success(node)
           
 
                 
     def expr(self):
             res = ParseResult()
             
-            if self.current_tok.matches(TT_KEYWORD, "VAR"):
+            if self.current_tok.matches(TT_KEYWORD, "HENSU"):
                  res.register_advancement()
                  self.advance()
 
@@ -529,30 +534,28 @@ class Parser:
             if res.error: 
                  return res.failure(InvalidSyntaxError(
                       self.current_tok.pos_start,self.current_tok.pos_end ,
-                     "Expected 'VAR', int ,float,identifier'+ ' , '-' , or '('"
+                     "Expected 'HENSU', int ,float,identifier'+ ' , '-' , or '('"
                 ))
             return res.success(node)
                  
            
     def bin_op(self,func_a, op,func_b = None):
-            
-          if func_b == None:
-                 
-                 func_b = func_a
-          res = ParseResult() 
-          left =res.register(func_a())
-          if res.error : return res 
+      if func_b == None:
+          func_b = func_a
+      res = ParseResult() 
+      left = res.register(func_a())
+      if res.error : return res 
 
-          while self.current_tok.type_ in op or (self.current_tok.type_ , self.current_tok.value) in op:
-               op_tok = self.current_tok
-               res.register_advancement()
-               self.advance()
-               right =res.register(func_b())
-               if res.error :return res
-               left = BinOpNode(left,op_tok,right)
+      while self.current_tok.type_ in op or (self.current_tok.type_ , self.current_tok.value) in op:
+          op_tok = self.current_tok
+          res.register_advancement()
+          self.advance()
+          right = res.register(func_b())
+          if res.error :return res
+          left = BinOpNode(left,op_tok,right)
 
                     
-          return res.success(left)
+      return res.success(left)
     
 
 #######################
@@ -620,9 +623,46 @@ class Number:
                 return Number(self.value / other.value).set_context(self.context), None 
           
      def powerd_by(self ,other):
-        if isinstance(other,Number):
+          if isinstance(other,Number):
                return Number(self.value ** other.value).set_context(self.context),None
-        
+
+
+     def get_comparison_eq(self, other):
+          if isinstance(other, Number):
+              return Number(bool(self.value == other.value)).set_context(self.context), None
+
+     def get_comparison_ne(self, other):
+	     if isinstance(other, Number):
+               return Number(bool(self.value != other.value)).set_context(self.context), None
+
+     def get_comparison_lt(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value < other.value)).set_context(self.context), None
+
+     def get_comparison_gt(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value > other.value)).set_context(self.context), None
+
+     def get_comparison_lte(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value <= other.value)).set_context(self.context), None
+
+     def get_comparison_gte(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value >= other.value)).set_context(self.context), None
+
+     def anded_by(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value and other.value)).set_context(self.context), None
+          
+     def ored_by(self, other):
+          if isinstance(other, Number):
+               return Number(bool(self.value or other.value)).set_context(self.context), None
+
+     def notted(self):
+          return Number(1 if self.value == 0 else 0).set_context(self.context), None       
+     
+
      def copy(self):
           copy = Number(self.value)
           copy.set_pos(self.pos_start,self.pos_end)
@@ -735,7 +775,31 @@ class Interpreter :
               result,error = left.dived_by(right)
 
          elif node.op_tok.type_ == TT_POWER:
-              result,error = left.powerd_by(right)      
+              result,error = left.powerd_by(right)   
+
+         elif node.op_tok.type_ == TT_EE:
+               result, error = left.get_comparison_eq(right)
+     
+         elif node.op_tok.type_ == TT_NE:
+               result, error = left.get_comparison_ne(right)
+
+         elif node.op_tok.type_ == TT_LT:
+               result, error = left.get_comparison_lt(right)
+
+         elif node.op_tok.type_ == TT_GT:
+               result, error = left.get_comparison_gt(right)
+
+         elif node.op_tok.type_ == TT_LTE:
+               result, error = left.get_comparison_lte(right)
+
+         elif node.op_tok.type_ == TT_GTE:
+               result, error = left.get_comparison_gte(right)
+               
+         elif node.op_tok.matches(TT_KEYWORD, 'AND'):
+               result, error = left.anded_by(right)
+
+         elif node.op_tok.matches(TT_KEYWORD, 'OR'):
+              result, error = left.ored_by(right)            
 
          if error:
               return res.failure(error)
@@ -751,6 +815,9 @@ class Interpreter :
 
         if node.op_tok.type_ == TT_MINUS:
              number,error = number.multed_by(Number(-1))
+        elif node.op_tok.matches(TT_KEYWORD, 'NOT'):
+             number, error = number.notted()
+        
 
         if error : return res.failure(error)
 
