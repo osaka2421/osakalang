@@ -1,13 +1,31 @@
 import basic
-while True:
-    text = input("basic >>")
-    result , error = basic.run("<stdin>",text)
+print("started")
+
+def run_repl():
+   print("repl is running")
+   print("type is exit to quite")
+   while True:
+      text = input("basic >>")
+
+      if text.lower() == "exit":
+        break
+     
+      if text == "":
+        continue
+
+
+      result , error = basic.run("<stdin>",text)
     
-    if error:
+      if error:
           print(error.as_string())
-    else:
-        print(result)   
+      else:
+        print(result) 
+
+
+run_repl()
 
  
+
+
         
     
