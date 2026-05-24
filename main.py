@@ -1,9 +1,7 @@
 import basic
-print("started")
+import sys
 
 def run_repl():
-   print("repl is running")
-   print("type is exit to quite")
    while True:
       text = input("basic >>")
 
@@ -22,10 +20,26 @@ def run_repl():
         print(result) 
 
 
-run_repl()
+def run_file(filename) :
+   try:
+      with open (filename , "r") as f :
+         text = f.read()
+      result , error = basic.run(filename, text)   
 
- 
+      if error:
+          print(error.as_string())
+      else:
+        print(result) 
+   except FileNotFoundError :
+      print(f"filname {filename} is not  found")
+
+if __name__ =="__main__":
+   if len(sys.argv) > 1 :
+      run_file(sys.argv[1])
 
 
-        
-    
+
+else :
+   run_repl()
+
+
