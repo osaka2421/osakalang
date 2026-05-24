@@ -110,6 +110,7 @@ TT_LT = 'LT'
 TT_GT = 'GT'
 TT_LTE = 'LTE'
 TT_GTE = 'GTE'
+TT_NEWLINE = 'NEWLINE'
 TT_EOF    =  'EOF'
 
 
@@ -164,6 +165,9 @@ class Lexer:
         while self.current_char != None :
             if self.current_char in ' \t':
                 self.advance()
+            elif self.current_char in '\n':
+                 tokens.append(Token(TT_NEWLINE,pos_start=self.pos))    
+                 self.advance()
             elif self.current_char in DIGITS :
                 tokens.append(self.make_number()) 
             elif self.current_char in LETTERS:
@@ -317,12 +321,19 @@ class VarAssignNode:
 
 
 class VarAccessNode:
-     def __init__(self, var_name_tok):
+     def __init__(self, var_name_tok,):
          self.var_name_tok =  var_name_tok
 
          self.pos_start = self.var_name_tok.pos_start
-         self.pos_end =self.value.node.pos_end 
+         self.pos_end =self.var_name_tok.pos_end 
 
+
+class ListNode:
+     def __init__(self, element_nodes ,pos_start,pos_end):
+          self.element_nodes = element_nodes
+
+          self.pos_start = pos_start
+          self.pos_end = pos_end
 
 
 
@@ -408,7 +419,7 @@ class Parser:
             
 ##################################################
     def parse (self):
-            res = self.expr()
+            res = self.statements()
 
             if not res.error and self.current_tok.type_!=TT_EOF:
                  return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+', '-', '*', '/' or '^'" ))
@@ -491,8 +502,42 @@ class Parser:
          
 
          return res.success(node)
-          
+    
+    def statements(self):
+          res =ParseResult()
+          statements = []
 
+          while self.current_tok.type_ == TT_NEWLINE:   
+                res.register_advancement()
+                self.advance()
+
+          statement = res.register(self.expr())
+          if res.error :
+                return res
+           
+
+          statements.append(statement)
+
+          while self.current_tok.type_== TT_NEWLINE:
+                res.register_advancement()
+                self.advance()
+
+                if self.current_tok.type_ == TT_EOF:
+                     break
+                
+                statement = res.register(self.expr())
+                if res.error:
+                     return res
+                
+
+          return res.success(
+               ListNode(
+               statements,
+               statements[0].pos_start,
+               statements[-1].pos_end 
+               )
+          )
+                
                 
     def expr(self):
             res = ParseResult()
@@ -754,7 +799,17 @@ class Interpreter :
             context.symbol_table.set(var_name,value)
             return res.success(value)
        
+       def visit_ListNode(self,node,context):
+            res = RTResult()
+            results =[]
 
+            for element_nodes in node.element_nodes:
+                 results.append(res.register(self.visit(element_nodes,context)))
+
+                 if res.error:
+                      return res
+                 
+            return res.success(results[-1] if results else None)
        def visit_BinOpNode(self,node,context):
          res = RTResult()
          left = res.register(self.visit(node.left_node,context))
@@ -783,7 +838,7 @@ class Interpreter :
          elif node.op_tok.type_ == TT_NE:
                result, error = left.get_comparison_ne(right)
 
-         elif node.op_tok.type_ == TT_LT:
+         elif node.op_tok.type_  == TT_LT:
                result, error = left.get_comparison_lt(right)
 
          elif node.op_tok.type_ == TT_GT:
