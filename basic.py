@@ -529,7 +529,8 @@ class Parser:
                 if res.error:
                      return res
                 
-
+                statements.append(statement)
+                
           return res.success(
                ListNode(
                statements,

@@ -1,3 +1,3 @@
-HENSU x = 2
-HENSU y = 3
-x + y
+HENSU a = 2
+HENSU b = 4
+a + b
