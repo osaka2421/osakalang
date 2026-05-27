@@ -1,3 +1,10 @@
-HENSU a = 2
-HENSU b = 4
-a + b
+WHEN 2 > 5 DO
+    10
+OTHERWISE
+    20
+END
+
+
+WHEN 5 > 2
+    10
+ END
