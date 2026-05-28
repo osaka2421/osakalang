@@ -112,7 +112,7 @@ TT_GT = 'GT'
 TT_LTE = 'LTE'
 TT_GTE = 'GTE'
 TT_NEWLINE = 'NEWLINE'
-TT_EOF    =  'EOF'
+TT_EQF    =  'EOF'
 
 
 KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","END","OTHERWISE"]
@@ -210,7 +210,7 @@ class Lexer:
                 self.advance()
                 return [], IllegalCharError("'"+ char +"'",pos_start,self.pos)  
 
-        tokens.append(Token(TT_EOF,pos_start=self.pos))
+        tokens.append(Token(TT_EQF,pos_start=self.pos))
         return tokens , None 
     
     def make_number(self):
@@ -435,7 +435,7 @@ class Parser:
     def parse (self):
             res = self.statements()
 
-            if not res.error and self.current_tok.type_!=TT_EOF:
+            if not res.error and self.current_tok.type_!=TT_EQF:
                  return res.failure(InvalidSyntaxError(self.current_tok.pos_start,self.current_tok.pos_end, "Expected '+', '-', '*', '/' or '^'" ))
             return res
     
@@ -545,22 +545,22 @@ class Parser:
           statement = res.register(self.expr())
           if res.error :
                 return res
-           
 
           statements.append(statement)
-
-          while self.current_tok.type_== TT_NEWLINE:
+          while self.current_tok.type_ != TT_EQF:
+               
+            while self.current_tok.type_== TT_NEWLINE:
                 res.register_advancement()
                 self.advance()
 
-                if self.current_tok.type_ == TT_EOF:
-                     break
-                
-                statement = res.register(self.expr())
-                if res.error:
+            if self.current_tok.type_ == TT_EQF:
+                 break
+               
+            statement = res.register(self.expr())
+            if res.error:
                      return res
                 
-                statements.append(statement)
+            statements.append(statement)
                 
           return res.success(
                ListNode(
