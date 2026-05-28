@@ -1,0 +1,11 @@
+WHEN 5 > 2 DO
+    100
+OTHERWISE
+    0
+END
+
+WHEN 6 < 2 DO
+    500
+OTHERWISE
+    200
+END

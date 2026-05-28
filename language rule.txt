@@ -11,5 +11,8 @@ power : atom(power factor )*
 atom : int float
        lPAREN expr RPAREN
 
+program : statements
+
+statements : - (NEWLINE+ expr)*
 
 
