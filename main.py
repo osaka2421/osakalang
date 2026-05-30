@@ -17,7 +17,10 @@ def run_repl():
       if error:
           print(error.as_string())
       if result is not None :
-        print(result) 
+        if isinstance(result ,list) and len(result) == 1:
+           print(result[0])
+        else:
+         print(result) 
 
 
 def run_file(filename) :
