@@ -89,8 +89,7 @@ class RTError(Error):
 
 ##########################
 ## token #########
-##################
-
+#################
 
 
 TT_INT = 'INT'
@@ -115,7 +114,7 @@ TT_NEWLINE = 'NEWLINE'
 TT_EQF    =  'EOF'
 
 
-KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","END","OTHERWISE"]
+KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","END","OTHERWISE","SHOW"]
 
 
 class Token:
@@ -367,6 +366,15 @@ class WhenNode:
                self.pos_end = self.otherwise_node.pos_end
           else:
                self.pos_end = self.body_node.pos_end
+
+class ShowNode:
+     def __init__(self,value_node):
+          self.value_node = value_node
+
+
+          self.pos_start = value_node.pos_start
+          self.pos_end = value_node.pos_end
+     
          
 
 ############################
@@ -573,6 +581,20 @@ class Parser:
                 
     def expr(self):
             res = ParseResult()
+
+
+            if self.current_tok.matches(TT_KEYWORD,"SHOW"):
+                 res.register_advancement()
+                 self.advance()
+
+                 value = res.register(self.expr())
+
+                 if res.error:
+                      return res
+                 
+                 return res.success(ShowNode(value))
+                 
+
             
             if self.current_tok.matches(TT_KEYWORD, "HENSU"):
                  res.register_advancement()
@@ -904,19 +926,27 @@ class Interpreter :
             if res.error : return res
 
             context.symbol_table.set(var_name,value)
-            return res.success(value)
+            return res.success(None)
        
        def visit_ListNode(self,node,context):
             res = RTResult()
             results =[]
 
             for element_nodes in node.element_nodes:
-                 results.append(res.register(self.visit(element_nodes,context)))
+                 value = res.register(self.visit(element_nodes,context))
 
                  if res.error:
                       return res
                  
-            return res.success(results[-1] if results else None)
+                 if value is not None:
+                      results.append(value)
+
+            if len(results)==0:
+                 return res.success(None)
+                 
+
+                 
+            return res.success(results)
        
        
        
@@ -952,9 +982,21 @@ class Interpreter :
                  return res.success(value)
             
             return res.success(Number(0))
-                 
+       
+       def visit_ShowNode(self,node,context):
+            res = RTResult()
+
+            value = res.register(
+                 self.visit(node.value_node,context))
             
+            if res.error:
+                 return res
             
+            print(value)
+
+            return res.success(None)
+
+
        def visit_BinOpNode(self,node,context):
          res = RTResult()
          left = res.register(self.visit(node.left_node,context))
@@ -1033,7 +1075,7 @@ global_symbol_table = SymbolTable()
 global_symbol_table.set("null", Number(0))
 
 
-##################
+##################s
 ### genarte tokens####
 
 def run (fn,text):

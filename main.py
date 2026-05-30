@@ -16,7 +16,7 @@ def run_repl():
     
       if error:
           print(error.as_string())
-      else:
+      if result is not None :
         print(result) 
 
 
@@ -28,7 +28,7 @@ def run_file(filename) :
 
       if error:
           print(error.as_string())
-      else:
+      if result is not None:
         print(result) 
    except FileNotFoundError :
       print(f"filname {filename} is not  found")
