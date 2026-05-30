@@ -16,3 +16,27 @@ program : statements
 statements : - (NEWLINE+ expr)*
 
 
+SHOW Statement
+
+Syntax:
+SHOW expression
+
+Description:
+Evaluates an expression and displays its value to the user.
+
+Examples:
+
+SHOW 5 + 2
+
+Output:
+7
+
+HENSU a = 10
+HENSU b = 30
+
+SHOW a + b
+
+Output:
+40
+
+
