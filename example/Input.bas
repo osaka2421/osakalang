@@ -1,0 +1,4 @@
+SHOW 100
+HENSU age = INPUT
+SHOW age 
+SHOW age + 10

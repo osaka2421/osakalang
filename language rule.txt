@@ -1,0 +1,56 @@
+ expr :  KEYWORD:VAR IDENTIFIER EQ expr
+                : term(plus | minus)term *
+
+ term : factor(mul | div )factor *
+
+factor :     (plus | minus)factor 
+                   : power
+
+power : atom(power factor )*
+
+atom : int float
+       lPAREN expr RPAREN
+
+program : statements
+
+statements : - (NEWLINE+ expr)*
+
+
+SHOW Statement
+
+Syntax:
+SHOW expression
+
+Description:
+Evaluates an expression and displays its value to the user.
+
+Examples:
+
+SHOW 5 + 2
+
+Output:
+7
+
+HENSU a = 10
+HENSU b = 30
+
+SHOW a + b
+
+Output:
+40
+
+
+Input expression
+Syntax :
+ 
+
+HENSU var = Input
+
+Examples:
+HENSU age = INPUT
+SHOW age
+
+
+
+
+

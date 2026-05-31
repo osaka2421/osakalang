@@ -113,6 +113,27 @@ class Interpreter :
             print(value)
 
             return res.success(None)
+       
+       def visit_InputNode(self,node,context):
+            res =RTResult()
+         
+
+            text = input()
+
+            try :
+                 value = int(text)
+            except:
+                 try:
+                      value = float(text)
+                 except:
+                      return res.failure(RTError(
+                           node.pos_start,
+                           node.pos_end,
+                           "Expected a Number",context
+                      ))
+                 
+            return res.success(Number(value))
+                 
 
 
        def visit_BinOpNode(self,node,context):

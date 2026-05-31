@@ -74,7 +74,12 @@ class ShowNode:
 
           self.pos_start = value_node.pos_start
           self.pos_end = value_node.pos_end
-     
+
+
+class InputNode:
+     def __init__(self,pos_start,pos_end):
+          self.pos_start = pos_start
+          self.pos_end = pos_end
          
 
 ############################

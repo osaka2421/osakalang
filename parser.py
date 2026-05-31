@@ -93,6 +93,11 @@ class Parser:
                       return res 
                  
                  return res.success(when_expr)
+            
+            if tok.matches(TT_KEYWORD , "INPUT"):
+                 res.register_advancement()
+                 self.advance()
+                 return res.success(InputNode(tok.pos_start,tok.pos_end))
 
             return res.failure(InvalidSyntaxError(
                  tok.pos_start, tok.pos_end,
