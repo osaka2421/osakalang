@@ -61,7 +61,9 @@ class Lexer:
             elif self.current_char == '<': 
                  tokens.append(self.make_less_than())
             elif  self.current_char == '>':
-                 tokens.append(self.make_greater_than())            
+                 tokens.append(self.make_greater_than())    
+            elif self.current_char == '"':
+                tokens.append(self.make_string())   
             else :
                 pos_start= self.pos.copy()
                 char = self.current_char
@@ -150,6 +152,24 @@ class Lexer:
               tok_type = TT_GTE
               
          return Token(tok_type,pos_start = pos_start , pos_end = self.pos)
+    
+    def make_string(self):
+        string = ""
+        pos_start = self.pos.copy()
+        self.advance()
+
+
+        while self.current_char is not None and self.current_char != '"':
+            string += self.current_char
+
+            self.advance()
+        self.advance()
+
+        return Token(TT_STRING, string, pos_start= pos_start,pos_end=self.pos)    
+            
+
+        
+        
 
     
 

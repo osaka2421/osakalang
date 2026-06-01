@@ -133,6 +133,15 @@ class Interpreter :
                       ))
                  
             return res.success(Number(value))
+       
+       def visit_StringNode(self,node,context):      
+            return RTResult().success(
+                 string(node.tok.value)
+                 .set_context(context).set_pos(node.pos_start,node.pos_end)
+                 
+            )
+
+
                  
 
 

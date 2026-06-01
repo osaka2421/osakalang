@@ -93,6 +93,10 @@ class Parser:
                       return res 
                  
                  return res.success(when_expr)
+            elif tok.type_ == TT_STRING:
+                 res.register_advancement()
+                 self.advance()
+                 return res.success(StringNode(tok))
             
             if tok.matches(TT_KEYWORD , "INPUT"):
                  res.register_advancement()

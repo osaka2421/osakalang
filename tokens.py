@@ -16,6 +16,7 @@ TT_LT = 'LT'
 TT_GT = 'GT'
 TT_LTE = 'LTE'
 TT_GTE = 'GTE'
+TT_STRING = "STRING"
 TT_NEWLINE = 'NEWLINE'
 TT_EQF    =  'EOF'
 
