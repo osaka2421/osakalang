@@ -54,18 +54,17 @@ class BinOpNode:
    
    
 class WhenNode:
-     def __init__(self,condition_node,body_node,otherwise_node):
-          self.condition_node = condition_node
-          self.body_node = body_node
-          self.otherwise_node = otherwise_node
-          
-          self.pos_start = self.condition_node.pos_start
-          
-          
-          if self.otherwise_node:
-               self.pos_end = self.otherwise_node.pos_end
+     def __init__(self,cases,otherwise_case):
+          self.cases = cases
+          self.otherwise_case = otherwise_case
+
+          self.pos_start = self.cases[0][0].pos_start
+
+
+          if self.otherwise_case:
+               self.pos_end = self.otherwise_case.pos_end
           else:
-               self.pos_end = self.body_node.pos_end
+               self.pos_end = self.cases[-1][1].pos_end
 
 class ShowNode:
      def __init__(self,value_node):

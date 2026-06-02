@@ -70,37 +70,36 @@ class Interpreter :
        
        def visit_WhenNode(self,node,context):
             res = RTResult()
-            
-            condition = res.register(
-                 self.visit(node.condition_node,context)
-            )
-            
-            
-            if res.error : return res
-            
-            
-            if condition.value:
-                 value = res.register(
-                     self.visit(node.body_node,context)
-                 )
+
+
+            for condition,body in node.cases:
+                 condition_value = res.register(self.visit(condition,context))
                  
+
                  if res.error:
                       return res
                  
+                 if condition_value.value:
+                      value = res.register(self.visit(body,context))
+                         
+                      
+                      if res.error:
+                           return res
+                      
+
+                      return res.success(value)
                  
-                 return res.success(value)
-            
-            elif node.otherwise_node:
-                 value = res.register(
-                     self.visit(node.otherwise_node,context))
-                 
-                 if res.error:
-                      return res
-                 
-                 return res.success(value)
+            if node.otherwise_case:
+               value = res.register(self.visit(node.otherwise_case,context))
+               if res.error:
+                    return res
+               
+               return res.success(value)
             
             return res.success(Number(0))
-       
+                    
+          
+                      
        def visit_ShowNode(self,node,context):
             res = RTResult()
 

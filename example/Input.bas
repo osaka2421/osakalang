@@ -9,3 +9,10 @@ SHOW 1
 OTHERWISE 
 SHOW 0
 END
+
+HENSU age = INPUT 
+WHEN age >= 18 DO
+SHOW "Adult"
+OTHERWISE
+SHOW "Minor"
+END

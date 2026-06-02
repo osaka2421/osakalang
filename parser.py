@@ -270,7 +270,7 @@ class Parser:
          condition = res.register(self.expr())
          if res.error:
               return res
-         
+       
          if not self.current_tok.matches(TT_KEYWORD, 'DO'):
               return res.failure(InvalidSyntaxError(
                    self.current_tok.pos_start,self.current_tok.pos_end,
@@ -286,12 +286,54 @@ class Parser:
               
               
          body = res.register(self.expr())
+
          if res.error:
-                 return res
+              return res
+         
+         cases = [(condition, body)]
+         
+         
             
          while self.current_tok.type_ == TT_NEWLINE:
               res.register_advancement()
-              self.advance()   
+              self.advance()  
+
+         while self.current_tok.matches(TT_KEYWORD, 'ORWHEN'):
+              res.register_advancement()
+              self.advance()
+
+              condition = res.register(self.expr())
+
+              if res.error:
+                   return res
+              
+              if not self.current_tok.matches(TT_KEYWORD, 'DO'):
+                   return res.failure(InvalidSyntaxError(
+                        self.current_tok.pos_start,self.current_tok.pos_end,
+                        "Expected 'DO'"
+                   ))
+              
+              if res.error:
+                   return res
+              
+              res.register_advancement()
+              self.advance()
+
+              while self.current_tok.type_ == TT_NEWLINE:
+                   res.register_advancement()
+                   self.advance()
+
+              body = res.register(self.expr())
+
+              if res.error:
+                   return res
+              
+              cases.append((condition,body))
+
+              while self.current_tok.type_ == TT_NEWLINE:
+                   res.register_advancement()
+                   self.advance()
+
               
               
          otherwise_case = None
@@ -325,8 +367,8 @@ class Parser:
          res.register_advancement()     
          self.advance()
          
-         
-         return res.success(WhenNode(condition,body,otherwise_case))
+     
+         return res.success(WhenNode(cases,otherwise_case))
               
          
            
