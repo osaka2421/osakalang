@@ -1,0 +1,37 @@
+## OSAKA-LANG
+
+Object Oriented Scripting & Kernel Abstractions
+
+OSAKA-LANG is a custom programming language built from scratch using python.
+This language is designed with a focus on:
+Simplicity
+Custom syntax design
+Analytical and Logical expressions
+
+## Installation & Setup
+Clone the repository:
+
+git clone https://github.com/osaka2421/osakalang.git
+cd osakalang
+
+## Run the interpreter:
+python shell.py
+
+# file mode :
+python shell.py filname
+
+## Example Code:
+HENSU a = 10
+HENSU b = 20
+SHOW a + p
+OUTPUT:
+30
+
+## learning Resources 
+Make YOUR OWN Programming Language in Python --by CodePulse
+https://www.youtube.com/@CodePulse/playlists
+
+## Author
+OSAKA
+Passionate about building systems and exploring programming design
+
