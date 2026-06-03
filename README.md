@@ -17,7 +17,7 @@ cd osakalang
 ## Run the interpreter:
 python shell.py
 
-# file mode :
+file mode :
 python shell.py filname
 
 ## Example Code:
