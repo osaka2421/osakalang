@@ -20,12 +20,20 @@ python shell.py
 file mode :
 python shell.py filname
 
-## Example Code:
+
+## Example Code
+
+```text
 HENSU a = 10
 HENSU b = 20
-SHOW a + p
-OUTPUT:
+
+SHOW a + b
+```
+
+**Output:**
+```
 30
+```
 
 ## learning Resources 
 Make YOUR OWN Programming Language in Python --by CodePulse
