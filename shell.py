@@ -34,11 +34,10 @@ def run_file(filename) :
       if result is not None:
         print(result) 
    except FileNotFoundError :
-      print(f"filname {filename} is not  found")
+      print(f"filename {filename} is not found")
 
 if __name__ =="__main__":
    if len(sys.argv) > 1 :
       run_file(sys.argv[1])
    else :
       run_repl()   
-
