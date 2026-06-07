@@ -100,7 +100,17 @@ class Interpreter :
        
        def visit_WhileNode(self,node,context):
             res = RTResult()
+            loop_count = 0 
+            max_loop = 10000
             while True:
+                 loop_count += 1
+                 if loop_count > max_loop:
+                      return res.failure(RTError(
+                           node.pos_start,node.pos_end,
+                           "Infinite loop detect",context
+                      ))
+                      
+     
                  condition = res.register(self.visit(node.condition_node,context))
                  if  res.error:
                       return res
@@ -115,7 +125,6 @@ class Interpreter :
             return res.success(None)
                  
      
-
             
        def visit_ShowNode(self,node,context):
             res = RTResult()
