@@ -97,9 +97,26 @@ class Interpreter :
                return res.success(value)
             
             return res.success(Number(0))
-                    
-          
-                      
+       
+       def visit_WhileNode(self,node,context):
+            res = RTResult()
+            while True:
+                 condition = res.register(self.visit(node.condition_node,context))
+                 if  res.error:
+                      return res
+                 
+                 if not condition.value:
+                      break
+                 
+                 res.register(self.visit(node.body_node,context))
+                 if res.error:
+                      return res
+                 
+            return res.success(None)
+                 
+     
+
+            
        def visit_ShowNode(self,node,context):
             res = RTResult()
 
