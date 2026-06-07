@@ -21,7 +21,8 @@ TT_NEWLINE = 'NEWLINE'
 TT_EQF    =  'EOF'
 
 
-KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","ORWHEN","END","OTHERWISE","SHOW","INPUT"]
+KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","ORWHEN","END","OTHERWISE","SHOW","INPUT"
+            ,"WHILE"]
 
 
 class Token:
