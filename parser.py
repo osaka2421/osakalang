@@ -93,10 +93,18 @@ class Parser:
                       return res 
                  
                  return res.success(when_expr)
+            
+            elif tok.matches(TT_KEYWORD, 'WHILE'):
+                 while_expr = res.register(self.while_expr())
+                 if res.error:
+                      return res
+                 return res.success(while_expr)
+
             elif tok.type_ == TT_STRING:
                  res.register_advancement()
                  self.advance()
                  return res.success(StringNode(tok))
+            
             
             if tok.matches(TT_KEYWORD , "INPUT"):
                  res.register_advancement()
@@ -171,20 +179,26 @@ class Parser:
                 return res
 
           statements.append(statement)
-          while self.current_tok.type_ != TT_EQF:
-               
-            while self.current_tok.type_== TT_NEWLINE:
-                res.register_advancement()
-                self.advance()
 
-            if self.current_tok.type_ == TT_EQF:
+
+          while True :
+            while self.current_tok.type_ == TT_NEWLINE:
+                 res.register_advancement()
+                 self.advance()
+
+            if (
+                 self.current_tok.type_ == TT_EQF
+                 or  self.current_tok.matches(TT_KEYWORD,'END')
+            ):
                  break
-               
+                 
             statement = res.register(self.expr())
             if res.error:
-                     return res
-                
+                      return res
+     
+          
             statements.append(statement)
+
                 
           return res.success(
                ListNode(
@@ -369,6 +383,55 @@ class Parser:
          
      
          return res.success(WhenNode(cases,otherwise_case))
+    
+    def while_expr(self):
+         res = ParseResult()
+
+         if not self.current_tok.matches(TT_KEYWORD, 'WHILE'):
+              
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'WHILE'"
+              ))
+         
+         res.register_advancement()
+         self.advance()
+
+         condition = res.register(self.expr())
+         if  res.error:
+              return res
+         
+         if not self.current_tok.matches(TT_KEYWORD,'DO'):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'DO'"
+              ))
+         
+         res.register_advancement()
+         self.advance()
+
+         while self.current_tok.type_ == TT_NEWLINE:
+              res.register_advancement()
+              self.advance()
+
+         body = res.register(self.statements())
+         if res.error:
+              return res
+         
+         while self.current_tok.type_ == TT_NEWLINE:
+              res.register_advancement()
+              self.advance()
+
+         if not self.current_tok.matches(TT_KEYWORD, 'END'):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'END'"
+              ))
+         
+         res.register_advancement()
+         self.advance()
+
+         return res.success(WhileNode(condition,body))
               
          
            
