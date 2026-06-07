@@ -3,11 +3,11 @@ HENSU age = INPUT
 SHOW age 
 SHOW age + 10
 
-HENSU age = INPUT 
-WHEN age >= 18 DO
-SHOW 1
+HENSU a = INPUT
+WHEN (a / 2) * 2 = a DO
+SHOW "even"
 OTHERWISE 
-SHOW 0
+SHOW "odd"
 END
 
 HENSU age = INPUT 
