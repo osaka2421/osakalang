@@ -1,10 +1,10 @@
 
-from lexer import Lexer
-from parser import Parser 
-from interpreter import Interpreter
-from context import Context
-from SymbolTable import SymbolTable 
-from values import Number
+from core.lexer import Lexer
+from core.parser import Parser 
+from runtime.interpreter import Interpreter
+from runtime.context import Context
+from runtime.SymbolTable import SymbolTable 
+from runtime.values import Number
 
 
 ##### run #########

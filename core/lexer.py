@@ -1,8 +1,8 @@
 
-from tokens import *
-from Position import Position
-from constants import *
-from Error import * 
+from core.tokens import *
+from errors.Position import Position
+from core.constants import *
+from errors.Error import * 
 
 
 class Lexer:

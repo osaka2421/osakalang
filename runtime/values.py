@@ -1,5 +1,5 @@
 
-from Error import RTError
+from errors. Error import RTError
 class RTResult:
      def __init__(self):
           self.value = None

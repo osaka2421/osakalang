@@ -1,5 +1,5 @@
-from tokens import *
-from values import *
+from core.tokens import *
+from runtime.values import *
 class Interpreter :
        def visit(self,node ,context):        
           method_name = f'visit_{type(node).__name__}'

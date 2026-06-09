@@ -1,6 +1,6 @@
-from tokens import *
-from nodes import *
-from Error import InvalidSyntaxError 
+from core.tokens import *
+from core.nodes import *
+from errors. Error import InvalidSyntaxError 
 class ParseResult:
      def __init__(self):
           self.error = None
