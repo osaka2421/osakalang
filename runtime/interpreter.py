@@ -1,7 +1,7 @@
 from core.tokens import *
 from runtime.values import *
 class Interpreter :
-       def visit(self,node ,context):        
+       def visit(self,node ,context):      
           method_name = f'visit_{type(node).__name__}'
           method = getattr(self,method_name,self.no_visit_method)
           return method(node ,context)
@@ -66,6 +66,49 @@ class Interpreter :
                  
             return res.success(results)
        
+
+       def visit_ForNode(self,node,context):
+            res = RTResult()
+
+            start_value = res.register(
+                 self.visit(node.start_value_node,context)
+            )
+
+
+            end_value = res.register(
+                 self.visit(node.end_value_node,context)
+            )
+
+
+            if node.step_value_node:
+                 step_value = res.register(
+                      self.visit(node.step_value_node,context)
+
+                 )
+
+            else :
+                 step_value = Number(1)
+
+
+            i = start_value.value
+
+            while i <= end_value.value:
+                 context.symbol_table.set(
+                      node.var_name_tok.value, 
+                      Number(i)
+                 )
+                 
+                 res.register (self.visit(node.body_node,context)
+                 )
+
+                 if res.error:
+                      return res
+                 
+
+                 i += step_value.value
+
+
+            return res.success(None)
        
        
        def visit_WhenNode(self,node,context):
