@@ -72,4 +72,16 @@ Output:
 2
 3
 
+FOR LOOP
 
+Syntax:
+
+FOR identifier = start_value TO end_value DO
+    statements
+END
+
+Example:
+
+FOR i = 1 TO 5 DO
+    SHOW i
+END
