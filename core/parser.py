@@ -99,11 +99,18 @@ class Parser:
                  if res.error:
                       return res
                  return res.success(while_expr)
+            
+            elif tok.matches(TT_KEYWORD ,'FOR'):
+                 for_expr = res.register(self.for_expr())
+                 if res.error:
+                      return res
+                 return res.success(for_expr)
 
             elif tok.type_ == TT_STRING:
                  res.register_advancement()
                  self.advance()
                  return res.success(StringNode(tok))
+            
             
             
             if tok.matches(TT_KEYWORD , "INPUT"):
@@ -432,7 +439,115 @@ class Parser:
          self.advance()
 
          return res.success(WhileNode(condition,body))
-              
+    
+
+    def for_expr(self):
+         res = ParseResult()
+
+
+         if not self.current_tok.matches(TT_KEYWORD,"FOR"):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'FOR'"
+              ))
+         
+         res.register_advancement()
+         self.advance()
+
+         if self.current_tok.type_ != TT_IDENTIFIER:
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected Identifier"
+              ))
+         
+
+         var_name = self.current_tok
+
+         res.register_advancement()
+         self.advance()
+
+
+         if self.current_tok.type_ != TT_EQ:
+              print("current token",self.current_tok)
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected  '='"
+              ))
+         
+
+
+         res.register_advancement()
+         self.advance()
+
+
+         start_value = res.register(self.expr())
+
+
+
+         if res.error:
+              return res
+         
+
+         if not self.current_tok.matches(TT_KEYWORD,"TO"):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'TO'"
+              ))
+         
+
+         res.register_advancement()
+         self.advance()
+
+         end_value = res.register(self.expr())
+         if res.error:
+              return res
+         
+
+         step_value = None
+         
+
+         if self.current_tok.matches(TT_KEYWORD,"STEP"):
+              res.register_advancement()
+              self.advance()
+
+              step_value = res.register(self.expr())
+              if res.error:
+                   return res
+
+
+         if not self.current_tok.matches(TT_KEYWORD,"DO"):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'DO'"
+              ))
+         
+
+         res.register_advancement()
+         self.advance()
+
+         body = res.register(self.statements())
+          
+         if not self.current_tok.matches(TT_KEYWORD,"END"):
+              return res.failure(InvalidSyntaxError(
+                   self.current_tok.pos_start,self.current_tok.pos_end,
+                   "Expected 'END'"
+              ))
+         
+         res.register_advancement()
+         self.advance()
+
+
+         return res.success(ForNode(
+              var_name,
+              start_value,
+              end_value,
+              step_value,
+              body
+         ))
+
+
+       
+            
          
            
     def bin_op(self,func_a, op,func_b = None):
