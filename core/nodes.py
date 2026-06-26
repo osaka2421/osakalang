@@ -97,9 +97,19 @@ class ShowNode:
           self.pos_start = value_node.pos_start
           self.pos_end = value_node.pos_end
 
-          
 
-class InputNode:
+class FunNode:
+     def __init__(self,var_name_tok,arg_name_toks,body_node):
+          self.var_name_tok = var_name_tok
+          self.arg_name_toks = arg_name_toks
+          self.body_node = body_node
+
+
+class CallNode:
+     def __init__(self,node_to_call,arg_nodes):
+          self.node_to_call = node_to_call
+          self.arg_nodes = arg_nodes
+
      def __init__(self,pos_start,pos_end):
           self.pos_start = pos_start
           self.pos_end = pos_end
