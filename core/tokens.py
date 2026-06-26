@@ -22,7 +22,7 @@ TT_EQF    =  'EOF'
 
 
 KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","ORWHEN","END","OTHERWISE","SHOW","INPUT"
-            ,"WHILE"]
+            ,"WHILE","FOR","STEP","TO","FUN","RETURN"]
 
 
 class Token:
@@ -48,3 +48,6 @@ class Token:
         if self.value: return f'{self.type_}:{self.value}'
         return f'{ self.type_}'
     
+
+
+
