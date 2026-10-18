@@ -25,7 +25,7 @@ TT_EQF    =  'EOF'
 
 
 KEYWORDS = ["HENSU","AND","OR","NOT","WHEN","DO","ORWHEN","END","OTHERWISE","SHOW","INPUT"
-            ,"WHILE","FOR","STEP","TO","FUN","RETURN","LEN"]
+            ,"WHILE","FOR","STEP","TO","FUN","RETURN","LEN", "MEAN",]
 
 
 class Token:
